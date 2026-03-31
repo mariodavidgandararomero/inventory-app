@@ -14,12 +14,21 @@ backend/inventory.db-wal
 # Build output
 frontend/build/
 
+<<<<<<< HEAD
+# Environment variables — NUNCA subir a git
+=======
 # Environment variables
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
 .env
 .env.local
 .env.production
 backend/.env
 frontend/.env.local
+<<<<<<< HEAD
+# Sí subir el ejemplo:
+# !backend/.env.example
+=======
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
 
 # OS files
 .DS_Store

@@ -1,7 +1,17 @@
+<<<<<<< HEAD
+require('dotenv').config();
+=======
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
 const express = require('express');
 const cors = require('cors');
 const { body, param, validationResult } = require('express-validator');
 const { initializeDatabase, all, get, run } = require('./database');
+<<<<<<< HEAD
+const { authenticate, authorize } = require('./middleware/auth');
+const authRoutes = require('./routes/auth');
+const usersRoutes = require('./routes/users');
+=======
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -9,16 +19,34 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+<<<<<<< HEAD
+=======
 // ── Validation middleware ─────────────────────────────────────────────────────
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
   next();
 };
 
+<<<<<<< HEAD
+// ── Rutas públicas (sin auth) ──────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+
+// ── Middleware de autenticación global para todo lo demás ─────────────────────
+app.use('/api', authenticate);
+
+// ── Rutas de usuarios (solo admin/manager) ─────────────────────────────────────
+app.use('/api/users', usersRoutes);
+
+// ── CATEGORIES ────────────────────────────────────────────────────────────────
+
+app.get('/api/categories', authorize('categories.view'), (req, res) => {
+=======
 // ── CATEGORIES ────────────────────────────────────────────────────────────────
 
 app.get('/api/categories', (req, res) => {
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   try {
     const categories = all(`
       SELECT c.*, COUNT(p.id) as product_count
@@ -31,6 +59,10 @@ app.get('/api/categories', (req, res) => {
 });
 
 app.post('/api/categories',
+<<<<<<< HEAD
+  authorize('categories.create'),
+=======
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   body('name').trim().notEmpty(),
   body('low_stock_threshold').optional().isInt({ min: 0 }),
   validate,
@@ -49,7 +81,11 @@ app.post('/api/categories',
   }
 );
 
+<<<<<<< HEAD
+app.put('/api/categories/:id', authorize('categories.edit'), param('id').isInt(), validate, (req, res) => {
+=======
 app.put('/api/categories/:id', param('id').isInt(), validate, (req, res) => {
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   try {
     const { name, description, icon, low_stock_threshold } = req.body;
     if (!get('SELECT id FROM categories WHERE id=?', [req.params.id]))
@@ -62,7 +98,11 @@ app.put('/api/categories/:id', param('id').isInt(), validate, (req, res) => {
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
+<<<<<<< HEAD
+app.delete('/api/categories/:id', authorize('categories.delete'), param('id').isInt(), validate, (req, res) => {
+=======
 app.delete('/api/categories/:id', param('id').isInt(), validate, (req, res) => {
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   try {
     const { count } = get('SELECT COUNT(*) as count FROM products WHERE category_id=?', [req.params.id]);
     if (count > 0) return res.status(409).json({ success: false, error: 'La categoría tiene productos asociados' });
@@ -73,7 +113,11 @@ app.delete('/api/categories/:id', param('id').isInt(), validate, (req, res) => {
 
 // ── PRODUCTS ──────────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
+app.get('/api/products', authorize('products.view'), (req, res) => {
+=======
 app.get('/api/products', (req, res) => {
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   try {
     const { search, category_id, low_stock } = req.query;
     let where = ['p.is_active = 1'];
@@ -87,7 +131,11 @@ app.get('/api/products', (req, res) => {
     if (category_id) { where.push('p.category_id = ?'); params.push(category_id); }
     if (low_stock === 'true') where.push('p.stock <= c.low_stock_threshold');
 
+<<<<<<< HEAD
+    const w = `WHERE ${where.join(' AND ')}`;
+=======
     const w = where.length ? `WHERE ${where.join(' AND ')}` : '';
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
     const products = all(`
       SELECT p.*, c.name as category_name, c.icon as category_icon, c.low_stock_threshold,
         ROUND((p.sale_price - p.cost_price) / MAX(p.sale_price,0.01) * 100, 2) as margin_percent,
@@ -97,6 +145,18 @@ app.get('/api/products', (req, res) => {
       ${w} ORDER BY p.updated_at DESC
     `, params).map(p => ({ ...p, specifications: JSON.parse(p.specifications || '{}') }));
 
+<<<<<<< HEAD
+    res.json({ success: true, data: products, pagination: { total: products.length, page: 1, limit: products.length, pages: 1 } });
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+app.get('/api/products/:id', authorize('products.view'), param('id').isInt(), validate, (req, res) => {
+  try {
+    const product = get(`
+      SELECT p.*, c.name as category_name, c.icon as category_icon, c.low_stock_threshold,
+        ROUND((p.sale_price-p.cost_price)/MAX(p.sale_price,0.01)*100,2) as margin_percent,
+        ROUND(p.sale_price-p.cost_price,2) as margin_amount
+=======
     const total = products.length;
     res.json({ success: true, data: products, pagination: { total, page: 1, limit: total, pages: 1 } });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
@@ -108,16 +168,30 @@ app.get('/api/products/:id', param('id').isInt(), validate, (req, res) => {
       SELECT p.*, c.name as category_name, c.icon as category_icon, c.low_stock_threshold,
         ROUND((p.sale_price - p.cost_price) / MAX(p.sale_price,0.01) * 100, 2) as margin_percent,
         ROUND(p.sale_price - p.cost_price, 2) as margin_amount
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
       FROM products p JOIN categories c ON c.id=p.category_id
       WHERE p.id=? AND p.is_active=1
     `, [req.params.id]);
     if (!product) return res.status(404).json({ success: false, error: 'Producto no encontrado' });
+<<<<<<< HEAD
+    const movements = all(
+      `SELECT sm.*, u.name as user_name FROM stock_movements sm
+       LEFT JOIN users u ON u.id = sm.user_id
+       WHERE sm.product_id=? ORDER BY sm.created_at DESC LIMIT 20`,
+      [req.params.id]
+    );
+=======
     const movements = all('SELECT * FROM stock_movements WHERE product_id=? ORDER BY created_at DESC LIMIT 20', [req.params.id]);
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
     res.json({ success: true, data: { ...product, specifications: JSON.parse(product.specifications || '{}'), movements } });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
 app.post('/api/products',
+<<<<<<< HEAD
+  authorize('products.create'),
+=======
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   body('name').trim().notEmpty(),
   body('category_id').isInt(),
   body('cost_price').isFloat({ min: 0 }),
@@ -135,8 +209,14 @@ app.post('/api/products',
          parseInt(stock), unit||'unidad', brand||null, supplier||null, JSON.stringify(specifications||{})]
       );
       if (parseInt(stock) > 0) {
+<<<<<<< HEAD
+        run(`INSERT INTO stock_movements (product_id,user_id,type,quantity,previous_stock,new_stock,reason)
+             VALUES (?,?,?,?,?,?,?)`,
+          [lastInsertRowid, req.user.id, 'entrada', parseInt(stock), 0, parseInt(stock), 'Stock inicial']);
+=======
         run(`INSERT INTO stock_movements (product_id,type,quantity,previous_stock,new_stock,reason) VALUES (?,?,?,?,?,?)`,
           [lastInsertRowid, 'entrada', parseInt(stock), 0, parseInt(stock), 'Stock inicial']);
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
       }
       const created = get(`SELECT p.*, c.name as category_name, c.icon as category_icon
         FROM products p JOIN categories c ON c.id=p.category_id WHERE p.id=?`, [lastInsertRowid]);
@@ -148,7 +228,11 @@ app.post('/api/products',
   }
 );
 
+<<<<<<< HEAD
+app.put('/api/products/:id', authorize('products.edit'), param('id').isInt(), validate, (req, res) => {
+=======
 app.put('/api/products/:id', param('id').isInt(), validate, (req, res) => {
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   try {
     if (!get('SELECT id FROM products WHERE id=? AND is_active=1', [req.params.id]))
       return res.status(404).json({ success: false, error: 'Producto no encontrado' });
@@ -159,8 +243,12 @@ app.put('/api/products/:id', param('id').isInt(), validate, (req, res) => {
       cost_price=COALESCE(?,cost_price), sale_price=COALESCE(?,sale_price),
       unit=COALESCE(?,unit), brand=COALESCE(?,brand), supplier=COALESCE(?,supplier),
       specifications=COALESCE(?,specifications),
+<<<<<<< HEAD
+      updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+=======
       updated_at=CURRENT_TIMESTAMP
       WHERE id=?`,
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
       [name, sku, category_id ? parseInt(category_id) : null, description,
        cost_price!=null ? parseFloat(cost_price) : null,
        sale_price!=null ? parseFloat(sale_price) : null,
@@ -174,7 +262,11 @@ app.put('/api/products/:id', param('id').isInt(), validate, (req, res) => {
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
+<<<<<<< HEAD
+app.delete('/api/products/:id', authorize('products.delete'), param('id').isInt(), validate, (req, res) => {
+=======
 app.delete('/api/products/:id', param('id').isInt(), validate, (req, res) => {
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   try {
     if (!get('SELECT id FROM products WHERE id=? AND is_active=1', [req.params.id]))
       return res.status(404).json({ success: false, error: 'Producto no encontrado' });
@@ -186,6 +278,10 @@ app.delete('/api/products/:id', param('id').isInt(), validate, (req, res) => {
 // ── STOCK MOVEMENTS ───────────────────────────────────────────────────────────
 
 app.post('/api/products/:id/stock',
+<<<<<<< HEAD
+  authorize('stock.move'),
+=======
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   param('id').isInt(),
   body('type').isIn(['entrada', 'salida', 'ajuste']),
   body('quantity').isInt({ min: 1 }),
@@ -203,8 +299,14 @@ app.post('/api/products/:id/stock',
         newStock -= qty;
       } else { newStock = qty; }
       run('UPDATE products SET stock=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', [newStock, req.params.id]);
+<<<<<<< HEAD
+      run(`INSERT INTO stock_movements (product_id,user_id,type,quantity,previous_stock,new_stock,reason,notes)
+           VALUES (?,?,?,?,?,?,?,?)`,
+        [req.params.id, req.user.id, type, qty, product.stock, newStock, reason||null, notes||null]);
+=======
       run(`INSERT INTO stock_movements (product_id,type,quantity,previous_stock,new_stock,reason,notes) VALUES (?,?,?,?,?,?,?)`,
         [req.params.id, type, qty, product.stock, newStock, reason||null, notes||null]);
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
       res.json({ success: true, data: { previous_stock: product.stock, new_stock: newStock, type, quantity: qty } });
     } catch (err) { res.status(500).json({ success: false, error: err.message }); }
   }
@@ -212,7 +314,11 @@ app.post('/api/products/:id/stock',
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
+app.get('/api/dashboard', authorize('dashboard.view'), (req, res) => {
+=======
 app.get('/api/dashboard', (req, res) => {
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   try {
     const { count: total_products } = get('SELECT COUNT(*) count FROM products WHERE is_active=1');
     const { count: total_categories } = get('SELECT COUNT(*) count FROM categories');
@@ -235,8 +341,15 @@ app.get('/api/dashboard', (req, res) => {
     `);
 
     const recent_movements = all(`
+<<<<<<< HEAD
+      SELECT sm.*, p.name as product_name, p.sku, u.name as user_name
+      FROM stock_movements sm
+      JOIN products p ON p.id=sm.product_id
+      LEFT JOIN users u ON u.id=sm.user_id
+=======
       SELECT sm.*, p.name as product_name, p.sku
       FROM stock_movements sm JOIN products p ON p.id=sm.product_id
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
       ORDER BY sm.created_at DESC LIMIT 10
     `);
 
@@ -269,10 +382,18 @@ app.get('/api/health', (_, res) => res.json({ success: true, message: 'API funci
 initializeDatabase().then(() => {
   app.listen(PORT, () => {
     console.log(`\n🚀 Servidor corriendo en http://localhost:${PORT}`);
+<<<<<<< HEAD
+    console.log(`🔐 JWT Auth activo`);
+    console.log(`🌐 API: http://localhost:${PORT}/api\n`);
+  });
+}).catch(err => {
+  console.error('Error iniciando:', err);
+=======
     console.log(`📦 Base de datos lista`);
     console.log(`🌐 API: http://localhost:${PORT}/api\n`);
   });
 }).catch(err => {
   console.error('Error iniciando la base de datos:', err);
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
   process.exit(1);
 });
