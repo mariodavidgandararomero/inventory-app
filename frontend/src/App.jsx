@@ -1,12 +1,18 @@
 import React from 'react';
+<<<<<<< HEAD
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
+=======
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
 import { AppProvider } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
+<<<<<<< HEAD
 import Users from './pages/Users';
 import Login from './pages/Login';
 
@@ -102,6 +108,33 @@ export default function App() {
           } />
         </Routes>
 
+=======
+
+function Layout({ children }) {
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-6xl mx-auto p-6">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/categories" element={<Categories />} />
+          </Routes>
+        </Layout>
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
         <Toaster
           position="bottom-right"
           toastOptions={{
@@ -114,6 +147,7 @@ export default function App() {
               padding: '10px 16px',
             },
             success: { iconTheme: { primary: '#5da280', secondary: '#fff' } },
+<<<<<<< HEAD
             error:   { iconTheme: { primary: '#f43f5e', secondary: '#fff' } },
           }}
         />
@@ -129,3 +163,12 @@ function LoginGuard() {
   if (user) return <Navigate to="/" replace />;
   return <Login />;
 }
+=======
+            error: { iconTheme: { primary: '#f43f5e', secondary: '#fff' } },
+          }}
+        />
+      </AppProvider>
+    </BrowserRouter>
+  );
+}
+>>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
