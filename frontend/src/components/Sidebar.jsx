@@ -1,5 +1,4 @@
 import React from 'react';
-<<<<<<< HEAD
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
@@ -34,29 +33,6 @@ export default function Sidebar() {
     <>
       {sidebarOpen && (
         <div className="fixed inset-0 bg-ink-950/20 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
-=======
-import { NavLink, useLocation } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
-
-const NAV_ITEMS = [
-  { path: '/', icon: '◈', label: 'Panel de control', exact: true },
-  { path: '/products', icon: '⊞', label: 'Inventario' },
-  { path: '/categories', icon: '◉', label: 'Categorías' },
-];
-
-export default function Sidebar() {
-  const { categories, sidebarOpen, setSidebarOpen } = useApp();
-  const location = useLocation();
-
-  return (
-    <>
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-ink-950/20 z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
->>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
       )}
 
       <aside className={`
@@ -91,25 +67,14 @@ export default function Sidebar() {
               const isActive = item.exact
                 ? location.pathname === item.path
                 : location.pathname.startsWith(item.path);
-<<<<<<< HEAD
-=======
 
->>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   className={`
-<<<<<<< HEAD
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive ? 'bg-ink-800 text-white' : 'text-ink-400 hover:bg-ink-900 hover:text-white'}
-=======
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
-                    ${isActive
-                      ? 'bg-ink-800 text-white'
-                      : 'text-ink-400 hover:bg-ink-900 hover:text-white'
-                    }
->>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
                     ${!sidebarOpen ? 'justify-center' : ''}
                   `}
                   title={!sidebarOpen ? item.label : undefined}
@@ -124,22 +89,12 @@ export default function Sidebar() {
           {/* Categories quick-nav */}
           {sidebarOpen && categories.length > 0 && (
             <div className="mt-6 px-2">
-<<<<<<< HEAD
               <p className="px-3 text-xs font-semibold uppercase tracking-widest text-ink-600 mb-2">Categorías</p>
-=======
-              <p className="px-3 text-xs font-semibold uppercase tracking-widest text-ink-600 mb-2">
-                Categorías
-              </p>
->>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
               {categories.map(cat => (
                 <NavLink
                   key={cat.id}
                   to={`/products?category=${cat.id}`}
-<<<<<<< HEAD
                   className={`
-=======
-                  className={({ isActive }) => `
->>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
                     flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all
                     ${location.search.includes(`category=${cat.id}`) && location.pathname === '/products'
                       ? 'bg-ink-800 text-white'
@@ -156,7 +111,6 @@ export default function Sidebar() {
           )}
         </nav>
 
-<<<<<<< HEAD
         {/* User footer */}
         <div className="p-3 border-t border-ink-800 space-y-2">
           {sidebarOpen ? (
@@ -188,25 +142,6 @@ export default function Sidebar() {
               <button onClick={handleLogout} className="text-ink-500 hover:text-coral-400 text-xs transition-colors" title="Cerrar sesión">
                 ⎋
               </button>
-=======
-        {/* Footer */}
-        <div className="p-4 border-t border-ink-800">
-          {sidebarOpen ? (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-sage-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-700">A</span>
-              </div>
-              <div>
-                <p className="text-white text-xs font-medium">Admin</p>
-                <p className="text-ink-500 text-xs">Gestor de inventario</p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <div className="w-7 h-7 bg-sage-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-700">A</span>
-              </div>
->>>>>>> 840a05bf8c887331db8dfd0079cd05881a25db9e
             </div>
           )}
         </div>
