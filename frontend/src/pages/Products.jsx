@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { productsApi } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { formatCurrency, formatDate, getMarginBadge, getStockBadge } from '../utils/formatters';
+import { exportToExcel, exportToCSV } from '../utils/exportUtils';
 import ProductModal from '../components/ProductModal';
 import StockModal from '../components/StockModal';
 import toast from 'react-hot-toast';
@@ -74,6 +75,52 @@ export default function Products() {
     setLowStockFilter(false);
   };
 
+  // Handlers de exportación
+  const handleExportExcel = async () => {
+    try {
+      // Obtener todos los productos (sin paginación para la exportación)
+      const params = {};
+      if (search) params.search = search;
+      if (categoryFilter) params.category_id = categoryFilter;
+      if (lowStockFilter) params.low_stock = 'true';
+
+      const res = await productsApi.getAll(params);
+      const productsToExport = res.data || [];
+
+      if (productsToExport.length === 0) {
+        toast.error('No hay productos para exportar con los filtros actuales');
+        return;
+      }
+
+      exportToExcel(productsToExport, `inventario_${new Date().toISOString().split('T')[0]}`);
+      toast.success(`Exportados ${productsToExport.length} productos a Excel`);
+    } catch (err) {
+      toast.error('Error al exportar: ' + (err.message || 'Error desconocido'));
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const params = {};
+      if (search) params.search = search;
+      if (categoryFilter) params.category_id = categoryFilter;
+      if (lowStockFilter) params.low_stock = 'true';
+
+      const res = await productsApi.getAll(params);
+      const productsToExport = res.data || [];
+
+      if (productsToExport.length === 0) {
+        toast.error('No hay productos para exportar con los filtros actuales');
+        return;
+      }
+
+      exportToCSV(productsToExport, `inventario_${new Date().toISOString().split('T')[0]}`);
+      toast.success(`Exportados ${productsToExport.length} productos a CSV`);
+    } catch (err) {
+      toast.error('Error al exportar: ' + (err.message || 'Error desconocido'));
+    }
+  };
+
   const hasFilters = search || categoryFilter || lowStockFilter;
 
   return (
@@ -87,12 +134,47 @@ export default function Products() {
             {hasFilters && <span className="text-sage-600"> · Filtros activos</span>}
           </p>
         </div>
-        <button
-          onClick={() => { setSelectedProduct(null); setShowProductModal(true); }}
-          className="btn-primary"
-        >
-          + Nuevo producto
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Botón Exportar con dropdown */}
+          <div className="relative group">
+            <button
+              className="btn-secondary flex items-center gap-2"
+              title="Exportar inventario"
+            >
+              <span>↓ Exportar</span>
+            </button>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-ink-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+              <div className="py-1">
+                <button
+                  onClick={handleExportExcel}
+                  className="w-full px-4 py-2 text-left text-sm text-ink-700 hover:bg-ink-50 flex items-center gap-2"
+                >
+                  <span className="text-lg">📊</span>
+                  <div>
+                    <p className="font-medium">Excel (.xlsx)</p>
+                    <p className="text-xs text-ink-400">Formato con estilos</p>
+                  </div>
+                </button>
+                <button
+                  onClick={handleExportCSV}
+                  className="w-full px-4 py-2 text-left text-sm text-ink-700 hover:bg-ink-50 flex items-center gap-2"
+                >
+                  <span className="text-lg">📄</span>
+                  <div>
+                    <p className="font-medium">CSV</p>
+                    <p className="text-xs text-ink-400">Compatible con Excel</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => { setSelectedProduct(null); setShowProductModal(true); }}
+            className="btn-primary"
+          >
+            + Nuevo producto
+          </button>
+        </div>
       </div>
 
       {/* Search & Filters bar */}
