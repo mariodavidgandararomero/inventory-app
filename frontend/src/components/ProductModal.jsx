@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { productsApi } from '../services/api';
 import { generateSKU } from '../utils/formatters';
 import toast from 'react-hot-toast';
+import bwipjs from 'bwip-js';
 
 const DEFAULT_SPECS = {
   'Belleza': [
@@ -41,6 +42,7 @@ export default function ProductModal({ product, onClose, onSaved }) {
   const [form, setForm] = useState({
     name: '',
     sku: '',
+    barcode: '',
     category_id: categories[0]?.id || '',
     description: '',
     cost_price: '',
@@ -55,6 +57,8 @@ export default function ProductModal({ product, onClose, onSaved }) {
   const [specKeys, setSpecKeys] = useState([]);
   const [newSpecKey, setNewSpecKey] = useState('');
   const [loading, setLoading] = useState(false);
+  const [barcodePreview, setBarcodePreview] = useState(null);
+  const barcodeCanvasRef = useRef(null);
 
   const selectedCategory = categories.find(c => c.id === parseInt(form.category_id));
   const categorySpecs = DEFAULT_SPECS[selectedCategory?.name] || [];
@@ -64,6 +68,7 @@ export default function ProductModal({ product, onClose, onSaved }) {
       setForm({
         name: product.name || '',
         sku: product.sku || '',
+        barcode: product.barcode || '',
         category_id: product.category_id || categories[0]?.id || '',
         description: product.description || '',
         cost_price: product.cost_price || '',
@@ -88,7 +93,36 @@ export default function ProductModal({ product, onClose, onSaved }) {
         specifications: Object.fromEntries(defaultKeys.map(k => [k, f.specifications[k] || '']))
       }));
     }
-  }, [form.category_id]);
+  }, [form.category_id, isEdit]);
+
+  // Generar vista previa del código de barras
+  useEffect(() => {
+    if (form.barcode && barcodeCanvasRef.current) {
+      try {
+        bwipjs.toCanvas(barcodeCanvasRef.current, {
+          bcid: 'code128',
+          text: form.barcode,
+          scale: 3,
+          height: 10,
+          includetext: true,
+          textxalign: 'center',
+        });
+        setBarcodePreview(true);
+      } catch (err) {
+        setBarcodePreview(false);
+      }
+    } else {
+      setBarcodePreview(null);
+    }
+  }, [form.barcode]);
+
+  const generateBarcode = () => {
+    // Generar código basado en timestamp + números aleatorios (12 dígitos)
+    const base = Date.now().toString().slice(-8);
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const code = base + random;
+    setForm(f => ({ ...f, barcode: code }));
+  };
 
   const margin = form.sale_price && form.cost_price
     ? Math.round(((form.sale_price - form.cost_price) / form.sale_price) * 100)
@@ -188,6 +222,34 @@ export default function ProductModal({ product, onClose, onSaved }) {
                 onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
                 placeholder="Ej: BEL-001"
               />
+            </div>
+
+            <div className="col-span-2">
+              <label className="label">Código de barras (Code 128)</label>
+              <div className="flex gap-2">
+                <input
+                  className="input-field font-mono text-xs flex-1"
+                  value={form.barcode}
+                  onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))}
+                  placeholder="Ej: 123456789012"
+                />
+                <button
+                  type="button"
+                  onClick={generateBarcode}
+                  className="btn-secondary text-xs whitespace-nowrap"
+                  title="Generar código automáticamente"
+                >
+                  🔄 Generar
+                </button>
+              </div>
+              {barcodePreview !== null && form.barcode && (
+                <div className="mt-2 flex items-center justify-center bg-white border border-ink-100 rounded-lg p-2">
+                  <canvas ref={barcodeCanvasRef} className={barcodePreview ? '' : 'hidden'} />
+                  {!barcodePreview && (
+                    <p className="text-xs text-coral-500">Código inválido para Code 128</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

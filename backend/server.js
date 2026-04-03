@@ -91,9 +91,9 @@ app.get('/api/products', authorize('products.view'), (req, res) => {
     let params = [];
 
     if (search) {
-      where.push(`(p.name LIKE ? OR p.sku LIKE ? OR p.brand LIKE ? OR p.description LIKE ?)`);
+      where.push(`(p.name LIKE ? OR p.sku LIKE ? OR p.barcode LIKE ? OR p.brand LIKE ? OR p.description LIKE ?)`);
       const s = `%${search}%`;
-      params.push(s, s, s, s);
+      params.push(s, s, s, s, s);
     }
     if (category_id) { where.push('p.category_id = ?'); params.push(category_id); }
     if (low_stock === 'true') where.push('p.stock <= c.low_stock_threshold');
@@ -142,12 +142,12 @@ app.post('/api/products',
   validate,
   (req, res) => {
     try {
-      const { name, sku, category_id, description, cost_price, sale_price, stock, unit, brand, supplier, specifications } = req.body;
+      const { name, sku, barcode, category_id, description, cost_price, sale_price, stock, unit, brand, supplier, specifications } = req.body;
       const skuVal = sku || `PRD-${Date.now()}`;
       const { lastInsertRowid } = run(
-        `INSERT INTO products (name,sku,category_id,description,cost_price,sale_price,stock,unit,brand,supplier,specifications)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-        [name, skuVal, category_id, description||null, parseFloat(cost_price), parseFloat(sale_price),
+        `INSERT INTO products (name,sku,barcode,category_id,description,cost_price,sale_price,stock,unit,brand,supplier,specifications)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+        [name, skuVal, barcode||null, category_id, description||null, parseFloat(cost_price), parseFloat(sale_price),
          parseInt(stock), unit||'unidad', brand||null, supplier||null, JSON.stringify(specifications||{})]
       );
       if (parseInt(stock) > 0) {
@@ -159,7 +159,10 @@ app.post('/api/products',
         FROM products p JOIN categories c ON c.id=p.category_id WHERE p.id=?`, [lastInsertRowid]);
       res.status(201).json({ success: true, data: { ...created, specifications: JSON.parse(created.specifications||'{}') } });
     } catch (err) {
-      if (err.message.includes('UNIQUE')) return res.status(409).json({ success: false, error: 'El SKU ya existe' });
+      if (err.message.includes('UNIQUE')) {
+        if (err.message.includes('barcode')) return res.status(409).json({ success: false, error: 'El código de barras ya existe' });
+        return res.status(409).json({ success: false, error: 'El SKU ya existe' });
+      }
       res.status(500).json({ success: false, error: err.message });
     }
   }
@@ -169,15 +172,15 @@ app.put('/api/products/:id', authorize('products.edit'), param('id').isInt(), va
   try {
     if (!get('SELECT id FROM products WHERE id=? AND is_active=1', [req.params.id]))
       return res.status(404).json({ success: false, error: 'Producto no encontrado' });
-    const { name, sku, category_id, description, cost_price, sale_price, unit, brand, supplier, specifications } = req.body;
+    const { name, sku, barcode, category_id, description, cost_price, sale_price, unit, brand, supplier, specifications } = req.body;
     run(`UPDATE products SET
-      name=COALESCE(?,name), sku=COALESCE(?,sku), category_id=COALESCE(?,category_id),
+      name=COALESCE(?,name), sku=COALESCE(?,sku), barcode=COALESCE(?,barcode), category_id=COALESCE(?,category_id),
       description=COALESCE(?,description),
       cost_price=COALESCE(?,cost_price), sale_price=COALESCE(?,sale_price),
       unit=COALESCE(?,unit), brand=COALESCE(?,brand), supplier=COALESCE(?,supplier),
       specifications=COALESCE(?,specifications),
       updated_at=CURRENT_TIMESTAMP WHERE id=?`,
-      [name, sku, category_id ? parseInt(category_id) : null, description,
+      [name, sku, barcode, category_id ? parseInt(category_id) : null, description,
        cost_price!=null ? parseFloat(cost_price) : null,
        sale_price!=null ? parseFloat(sale_price) : null,
        unit, brand, supplier,

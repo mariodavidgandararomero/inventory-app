@@ -259,11 +259,11 @@ export default function Products() {
             {/* Table header */}
             <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-3 bg-ink-50/50 text-xs font-semibold text-ink-400 uppercase tracking-wider border-b border-ink-100">
               <div className="col-span-4">Producto</div>
+              <div className="col-span-2 text-center">Código</div>
               <div className="col-span-1 text-center">Stock</div>
               <div className="col-span-2 text-right">Costo</div>
               <div className="col-span-2 text-right">Precio</div>
               <div className="col-span-1 text-center">Margen</div>
-              <div className="col-span-2 text-right">Acciones</div>
             </div>
 
             <div className="divide-y divide-ink-50">
@@ -279,7 +279,7 @@ export default function Products() {
                       onClick={() => setExpandedProduct(isExpanded ? null : p.id)}
                     >
                       {/* Product info */}
-                      <div className="col-span-6 md:col-span-4 flex items-center gap-3">
+                      <div className="col-span-4 flex items-center gap-3">
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 ${isLowStock ? 'bg-coral-50' : 'bg-ink-50'}`}>
                           {p.category_icon}
                         </div>
@@ -292,8 +292,17 @@ export default function Products() {
                         </div>
                       </div>
 
+                      {/* Barcode */}
+                      <div className="col-span-2 flex justify-center">
+                        {p.barcode ? (
+                          <span className="font-mono text-xs text-ink-600 bg-ink-50 px-2 py-1 rounded">{p.barcode}</span>
+                        ) : (
+                          <span className="text-xs text-ink-300">—</span>
+                        )}
+                      </div>
+
                       {/* Stock */}
-                      <div className="col-span-2 md:col-span-1 flex justify-center">
+                      <div className="col-span-1 flex justify-center">
                         <span className={`badge ${stockBadge.cls} font-mono`}>{p.stock}</span>
                       </div>
 
