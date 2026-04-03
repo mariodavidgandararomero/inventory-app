@@ -67,6 +67,7 @@ async function initializeDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       sku TEXT UNIQUE,
+      barcode TEXT UNIQUE,
       category_id INTEGER NOT NULL,
       description TEXT,
       cost_price REAL NOT NULL DEFAULT 0,
@@ -154,26 +155,26 @@ async function initializeDatabase() {
       ('Electrónica','Pequeños dispositivos electrónicos y accesorios','🔌',3);
     `);
 
-    // Productos
+    // Productos con códigos de barras (Code 128)
     const prods = [
-      ['Labial Matte Premium','BEL-001',1,'Labial de larga duración con acabado matte',8500,18000,45,'Ruby Rose','Distribuidora Belleza Total',JSON.stringify({color:'Rojo Pasión',tono:'Cálido',duracion:'8 horas',acabado:'Matte'})],
-      ['Base de maquillaje HD','BEL-002',1,'Base líquida con cobertura total y protección solar',22000,48000,12,"L'Oréal",'Distribuidora Belleza Total',JSON.stringify({tono:'Beige Natural',spf:'SPF 30',cobertura:'Total',tipo_piel:'Mixta'})],
-      ['Paleta de sombras Smokey','BEL-003',1,'Paleta con 18 tonos para ojos ahumados',15000,32000,4,'NYX','Cosméticos del Norte',JSON.stringify({colores:18,acabado:'Mixto',tono:'Neutrales y oscuros'})],
-      ['Oso Teddy Grande','PEL-001',2,'Peluche de oso suave con relleno premium 40cm',25000,55000,8,'Importaciones Ternura','Mayorista Juguetes SAS',JSON.stringify({tamanio:'40cm',material:'Peluche suave',color:'Marrón',edad_recomendada:'3+ años'})],
-      ['Unicornio Arcoíris','PEL-002',2,'Peluche de unicornio colorido con cuerno brillante 30cm',18000,42000,2,'DreamToys','Mayorista Juguetes SAS',JSON.stringify({tamanio:'30cm',color:'Multicolor',caracteristica:'Cuerno brillante',material:'Ultra suave'})],
-      ['Billetera Cuero Bifold','BIL-001',3,'Billetera clásica de cuero genuino con 8 compartimentos',30000,68000,15,'CueroArt','Marroquinería Nacional',JSON.stringify({material:'Cuero genuino',color:'Negro',compartimentos:8,estilo:'Bifold',dimensiones:'10x8cm'})],
-      ['Monedero Mini Mujer','BIL-002',3,'Monedero compacto con cierre y espejo interno',12000,28000,22,'FashionBags','Distribuidora Accesorios Modernos',JSON.stringify({material:'Cuero sintético',color:'Rosado',cierre:'Cremallera',incluye:'Espejo pequeño'})],
-      ['Gorra Snapback Negra','GOR-001',4,'Gorra estilo snapback ajustable, visera plana',14000,32000,18,'UrbanCap','Textiles y Accesorios Ltda',JSON.stringify({talla:'Única ajustable',color:'Negro',estilo:'Snapback',visera:'Plana',material:'100% algodón'})],
-      ['Gorra Béisbol Bordada','GOR-002',4,'Gorra de béisbol con bordado personalizado',16000,38000,3,'SportsCap','Textiles y Accesorios Ltda',JSON.stringify({talla:'Única ajustable',color:'Azul marino',estilo:'Baseball',bordado:'Logo frontal',material:'Twill'})],
-      ['Máquina de Afeitar Eléctrica Rotativa','ELE-001',5,'Afeitadora eléctrica de 3 cabezas con carga USB',45000,98000,7,'Philips','Electrónica Distribuciones SAS',JSON.stringify({voltaje:'100-240V',tipo:'Rotativa',cabezas:3,carga:'USB-C',autonomia:'45 min',impermeable:'Sí'})],
-      ['Máquina de Afeitar Manual 5 Hojas','ELE-002',5,'Afeitadora manual con 5 hojas y banda lubricante',8000,18000,35,'Gillette','Electrónica Distribuciones SAS',JSON.stringify({hojas:5,banda:'Lubricante con aloe',mango:'Ergonómico',uso:'Desechable',paquete:'2 unidades'})],
-      ['Depiladora Facial USB','ELE-003',5,'Mini depiladora facial recargable por USB',28000,62000,1,'Kemei','Electrónica Distribuciones SAS',JSON.stringify({voltaje:'5V USB',uso:'Facial',velocidades:2,carga:'USB',luz_led:'Sí',impermeable:'No'})],
+      ['Labial Matte Premium','BEL-001','7891234560001',1,'Labial de larga duración con acabado matte',8500,18000,45,'Ruby Rose','Distribuidora Belleza Total',JSON.stringify({color:'Rojo Pasión',tono:'Cálido',duracion:'8 horas',acabado:'Matte'})],
+      ['Base de maquillaje HD','BEL-002','7891234560002',1,'Base líquida con cobertura total y protección solar',22000,48000,12,"L'Oréal",'Distribuidora Belleza Total',JSON.stringify({tono:'Beige Natural',spf:'SPF 30',cobertura:'Total',tipo_piel:'Mixta'})],
+      ['Paleta de sombras Smokey','BEL-003','7891234560003',1,'Paleta con 18 tonos para ojos ahumados',15000,32000,4,'NYX','Cosméticos del Norte',JSON.stringify({colores:18,acabado:'Mixto',tono:'Neutrales y oscuros'})],
+      ['Oso Teddy Grande','PEL-001','7891234560010',2,'Peluche de oso suave con relleno premium 40cm',25000,55000,8,'Importaciones Ternura','Mayorista Juguetes SAS',JSON.stringify({tamanio:'40cm',material:'Peluche suave',color:'Marrón',edad_recomendada:'3+ años'})],
+      ['Unicornio Arcoíris','PEL-002','7891234560011',2,'Peluche de unicornio colorido con cuerno brillante 30cm',18000,42000,2,'DreamToys','Mayorista Juguetes SAS',JSON.stringify({tamanio:'30cm',color:'Multicolor',caracteristica:'Cuerno brillante',material:'Ultra suave'})],
+      ['Billetera Cuero Bifold','BIL-001','7891234560020',3,'Billetera clásica de cuero genuino con 8 compartimentos',30000,68000,15,'CueroArt','Marroquinería Nacional',JSON.stringify({material:'Cuero genuino',color:'Negro',compartimentos:8,estilo:'Bifold',dimensiones:'10x8cm'})],
+      ['Monedero Mini Mujer','BIL-002','7891234560021',3,'Monedero compacto con cierre y espejo interno',12000,28000,22,'FashionBags','Distribuidora Accesorios Modernos',JSON.stringify({material:'Cuero sintético',color:'Rosado',cierre:'Cremallera',incluye:'Espejo pequeño'})],
+      ['Gorra Snapback Negra','GOR-001','7891234560030',4,'Gorra estilo snapback ajustable, visera plana',14000,32000,18,'UrbanCap','Textiles y Accesorios Ltda',JSON.stringify({talla:'Única ajustable',color:'Negro',estilo:'Snapback',visera:'Plana',material:'100% algodón'})],
+      ['Gorra Béisbol Bordada','GOR-002','7891234560031',4,'Gorra de béisbol con bordado personalizado',16000,38000,3,'SportsCap','Textiles y Accesorios Ltda',JSON.stringify({talla:'Única ajustable',color:'Azul marino',estilo:'Baseball',bordado:'Logo frontal',material:'Twill'})],
+      ['Máquina de Afeitar Eléctrica Rotativa','ELE-001','7891234560040',5,'Afeitadora eléctrica de 3 cabezas con carga USB',45000,98000,7,'Philips','Electrónica Distribuciones SAS',JSON.stringify({voltaje:'100-240V',tipo:'Rotativa',cabezas:3,carga:'USB-C',autonomia:'45 min',impermeable:'Sí'})],
+      ['Máquina de Afeitar Manual 5 Hojas','ELE-002','7891234560041',5,'Afeitadora manual con 5 hojas y banda lubricante',8000,18000,35,'Gillette','Electrónica Distribuciones SAS',JSON.stringify({hojas:5,banda:'Lubricante con aloe',mango:'Ergonómico',uso:'Desechable',paquete:'2 unidades'})],
+      ['Depiladora Facial USB','ELE-003','7891234560042',5,'Mini depiladora facial recargable por USB',28000,62000,1,'Kemei','Electrónica Distribuciones SAS',JSON.stringify({voltaje:'5V USB',uso:'Facial',velocidades:2,carga:'USB',luz_led:'Sí',impermeable:'No'})],
     ];
 
     prods.forEach(p => {
       _db.run(
-        `INSERT INTO products (name,sku,category_id,description,cost_price,sale_price,stock,brand,supplier,specifications)
-         VALUES (?,?,?,?,?,?,?,?,?,?)`, p
+        `INSERT INTO products (name,sku,barcode,category_id,description,cost_price,sale_price,stock,brand,supplier,specifications)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?)`, p
       );
     });
 
@@ -183,9 +184,9 @@ async function initializeDatabase() {
       rows[0].values.forEach(([id, stock]) => {
         if (stock > 0) {
           _db.run(
-            `INSERT INTO stock_movements (product_id,type,quantity,previous_stock,new_stock,reason)
-             VALUES (?,?,?,?,?,?)`,
-            [id, 'entrada', stock, 0, stock, 'Stock inicial']
+            `INSERT INTO stock_movements (product_id,user_id,type,quantity,previous_stock,new_stock,reason)
+             VALUES (?,?,?,?,?,?,?)`,
+            [id, 1, 'entrada', stock, 0, stock, 'Stock inicial']
           );
         }
       });
@@ -204,11 +205,33 @@ async function initializeDatabase() {
     console.log('   manager@inventario.com / manager123 (Manager)');
     console.log('   viewer@inventario.com  / viewer123  (Viewer)\n');
   } else {
-    // Migración: agregar columna user_id a stock_movements si no existe
+    // Migraciones: agregar columnas nuevas si no existen
     try {
       _db.run('ALTER TABLE stock_movements ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE SET NULL');
       saveDb();
     } catch (_) { /* columna ya existe */ }
+
+    try {
+      _db.run('ALTER TABLE products ADD COLUMN barcode TEXT UNIQUE');
+      saveDb();
+      console.log('✅ Migración: columna barcode agregada a products');
+    } catch (_) { /* columna ya existe */ }
+
+    // Generar códigos de barras para productos existentes que no tengan uno
+    try {
+      const productsWithoutBarcode = _db.exec("SELECT id, sku FROM products WHERE barcode IS NULL OR barcode = ''");
+      if (productsWithoutBarcode.length) {
+        productsWithoutBarcode[0].values.forEach(([id, sku]) => {
+          // Generar código basado en ID + timestamp
+          const base = Date.now().toString().slice(-8);
+          const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+          const barcode = base + random;
+          _db.run('UPDATE products SET barcode = ? WHERE id = ?', [barcode, id]);
+        });
+        saveDb();
+        console.log('✅ Migración: códigos de barras generados para productos existentes');
+      }
+    } catch (_) { /* ya tienen barcode */ }
   }
 
   return _db;
